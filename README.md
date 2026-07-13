@@ -1,8 +1,8 @@
-# ✓ GutCheck
+# 🍴 Feasting with Frank
 
-**Paste a food label's ingredient list — instantly see what may trigger acid reflux or IBS.**
+**Check food labels, dodge reflux and IBS triggers, and cook with what you have.**
 
-Live app: **https://johnclawthelegend.github.io/gut-check/**
+Live app: **https://johnclawthelegend.github.io/feasting-with-frank/**
 
 ## What it does
 
