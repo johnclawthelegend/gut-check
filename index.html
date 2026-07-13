@@ -128,6 +128,9 @@
   }
   details.recipe summary { color: var(--accent); }
   details.recipe p, details.recipe ul { margin-bottom: 8px; }
+  .match-line { font-size: .93rem; margin: 6px 0 8px; }
+  .have { color: var(--ok); }
+  .miss { color: var(--caution); }
   summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
   details p, details li { font-size: .95rem; }
   details ul { padding-left: 20px; margin: 6px 0; }
@@ -218,55 +221,20 @@
       </details>
     </div>
     <div class="card">
-      <h2>🍽️ Reflux-friendly recipes</h2>
+      <h2>🧺 Cook from what you have</h2>
+      <p class="hint">List the ingredients in your kitchen — get reflux-friendly recipes you can make right now.</p>
+      <textarea id="pantry-reflux" placeholder="e.g. chicken, rice, eggs, banana, oats, zucchini, potatoes, ginger…"></textarea>
+      <div class="btn-row">
+        <button class="primary" onclick="suggestRecipes('reflux')">Suggest recipes</button>
+        <button class="ghost" onclick="clearPantry('reflux')">Clear</button>
+      </div>
+      <div id="suggest-reflux"></div>
+    </div>
+
+    <div class="card">
+      <h2>🍽️ All reflux-friendly recipes</h2>
       <p class="hint">Low-acid, low-fat, no trigger spices — designed to be gentle on the esophagus.</p>
-
-      <details class="recipe">
-        <summary>Ginger-Honey Baked Chicken with Rice</summary>
-        <p><strong>Ingredients:</strong> 2 chicken breasts, 1 tbsp olive oil, 1 tsp grated fresh ginger, 1 tsp honey, ½ tsp dried thyme, pinch of salt, 1 cup rice, steamed green beans.</p>
-        <ul>
-          <li>Preheat oven to 200°C / 400°F. Rub chicken with oil, ginger, honey, thyme and salt.</li>
-          <li>Bake 22–25 min until cooked through (74°C / 165°F inside).</li>
-          <li>Serve over plain rice with steamed green beans. Ginger is one of the few "spices" that actually soothes many reflux stomachs.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Creamy Banana-Oat Breakfast Bowl</summary>
-        <p><strong>Ingredients:</strong> ½ cup rolled oats, 1 cup oat or almond milk, 1 ripe banana (sliced), 1 tsp maple syrup, pinch of cinnamon (optional — skip if sensitive), 1 tbsp chopped walnuts.</p>
-        <ul>
-          <li>Simmer oats in the milk for 5 min, stirring.</li>
-          <li>Top with banana, maple syrup and walnuts. Oats and banana are two of the most reflux-safe foods there are.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Herb-Poached White Fish with Mashed Potato</summary>
-        <p><strong>Ingredients:</strong> 2 cod or tilapia fillets, 2 cups low-sodium vegetable broth (onion/garlic-free if possible), parsley, dill, 2 potatoes, splash of low-fat milk, salt.</p>
-        <ul>
-          <li>Boil potatoes, mash with a splash of milk and a pinch of salt (skip the butter).</li>
-          <li>Poach fish in gently simmering broth with herbs, 8–10 min.</li>
-          <li>Poaching keeps it fat-free — no frying, no heartburn.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Turkey &amp; Zucchini Skillet</summary>
-        <p><strong>Ingredients:</strong> 300 g lean ground turkey, 1 zucchini (diced), 1 carrot (grated), 1 tbsp olive oil, ½ tsp dried oregano, salt, cooked couscous or rice to serve.</p>
-        <ul>
-          <li>Brown turkey in oil over medium heat, breaking it up.</li>
-          <li>Add zucchini, carrot, oregano and salt; cook 6–8 min until soft.</li>
-          <li>Serve over couscous. Lean protein + green veg, zero trigger spices.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Melon-Ginger Smoothie</summary>
-        <p><strong>Ingredients:</strong> 1 cup cantaloupe or honeydew chunks, ½ banana, ½ cup almond milk, ¼ tsp grated ginger, ice.</p>
-        <ul>
-          <li>Blend everything until smooth. Melons are low-acid and cooling — a safe swap for citrus smoothies.</li>
-        </ul>
-      </details>
+      <div id="recipelist-reflux"></div>
     </div>
   </section>
 
@@ -335,55 +303,20 @@
       </details>
     </div>
     <div class="card">
-      <h2>🍽️ Low-FODMAP recipes</h2>
+      <h2>🧺 Cook from what you have</h2>
+      <p class="hint">List the ingredients in your kitchen — get low-FODMAP recipes you can make right now.</p>
+      <textarea id="pantry-ibs" placeholder="e.g. chicken, rice, eggs, oats, strawberries, zucchini, potatoes…"></textarea>
+      <div class="btn-row">
+        <button class="primary" onclick="suggestRecipes('ibs')">Suggest recipes</button>
+        <button class="ghost" onclick="clearPantry('ibs')">Clear</button>
+      </div>
+      <div id="suggest-ibs"></div>
+    </div>
+
+    <div class="card">
+      <h2>🍽️ All low-FODMAP recipes</h2>
       <p class="hint">No onion, no garlic, low lactose — flavor comes from infused oil, herbs and spices instead.</p>
-
-      <details class="recipe">
-        <summary>Garlic-Infused Oil Chicken Stir-Fry</summary>
-        <p><strong>Ingredients:</strong> 2 tbsp garlic-infused olive oil (flavor without the fructans), 2 chicken breasts (sliced), 1 red bell pepper, 1 zucchini, 1 carrot, 2 tbsp tamari (gluten-free soy sauce), 1 tsp grated ginger, rice to serve.</p>
-        <ul>
-          <li>Heat the infused oil in a wok; stir-fry chicken until golden.</li>
-          <li>Add sliced vegetables and ginger; stir-fry 4–5 min.</li>
-          <li>Splash in tamari and serve over rice. FODMAPs don't dissolve into oil — that's why infused oil is the classic low-FODMAP hack.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Overnight Oats with Strawberries &amp; Peanut Butter</summary>
-        <p><strong>Ingredients:</strong> ½ cup rolled oats, ¾ cup lactose-free milk, 1 tbsp peanut butter, 1 tsp maple syrup, 5 strawberries (sliced), 1 tbsp pumpkin seeds.</p>
-        <ul>
-          <li>Mix oats, milk, peanut butter and maple syrup in a jar; refrigerate overnight.</li>
-          <li>Top with strawberries and seeds in the morning. All low-FODMAP at these portions.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Lemon-Herb Baked Salmon with Roast Potatoes</summary>
-        <p><strong>Ingredients:</strong> 2 salmon fillets, 1 lemon, fresh dill, 2 tbsp olive oil, 500 g potatoes, salt, pepper, green beans.</p>
-        <ul>
-          <li>Toss cubed potatoes in oil and salt; roast at 220°C / 425°F for 25 min.</li>
-          <li>Add salmon topped with lemon slices and dill for the last 12–14 min.</li>
-          <li>Steam green beans to serve alongside. Simple, filling, and completely FODMAP-safe.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Quinoa Bowl with Feta &amp; Roasted Veg</summary>
-        <p><strong>Ingredients:</strong> 1 cup quinoa, 1 zucchini, 1 red bell pepper, 1 carrot, 2 tbsp garlic-infused oil, 40 g feta (hard cheeses and feta are low-lactose), handful of spinach, squeeze of lemon.</p>
-        <ul>
-          <li>Roast chopped vegetables in the infused oil at 200°C / 400°F for 20 min.</li>
-          <li>Cook quinoa; fold in spinach while hot so it wilts.</li>
-          <li>Top with roasted veg, crumbled feta and lemon juice.</li>
-        </ul>
-      </details>
-
-      <details class="recipe">
-        <summary>Banana-Blueberry Smoothie</summary>
-        <p><strong>Ingredients:</strong> 1 firm banana (ripe ones are higher-FODMAP), ½ cup blueberries, 1 cup lactose-free milk or almond milk, 1 tsp maple syrup, ice.</p>
-        <ul>
-          <li>Blend until smooth. A safe swap for apple- or mango-based smoothies.</li>
-        </ul>
-      </details>
+      <div id="recipelist-ibs"></div>
     </div>
   </section>
 
@@ -477,6 +410,86 @@ const DB = {
   },
 };
 
+// ============ Recipe database ============
+// ing: [display, matchKey] — matchKey is what the pantry matcher looks for.
+// staple: true means we don't count it as "missing" (salt, oil, water, etc.)
+const RECIPES = {
+  reflux: [
+    {
+      name: "Ginger-Honey Baked Chicken with Rice",
+      ing: [["2 chicken breasts","chicken"],["1 cup rice","rice"],["1 tsp grated fresh ginger","ginger"],["1 tsp honey","honey"],["½ tsp dried thyme","thyme",true],["1 tbsp olive oil","olive oil",true],["steamed green beans","green bean"]],
+      steps: ["Preheat oven to 200°C / 400°F. Rub chicken with oil, ginger, honey, thyme and a pinch of salt.","Bake 22–25 min until cooked through (74°C / 165°F inside).","Serve over plain rice with steamed green beans. Ginger is one of the few \"spices\" that actually soothes many reflux stomachs."],
+    },
+    {
+      name: "Creamy Banana-Oat Breakfast Bowl",
+      ing: [["½ cup rolled oats","oat"],["1 cup oat or almond milk","milk"],["1 ripe banana","banana"],["1 tsp maple syrup","maple",true],["1 tbsp chopped walnuts","walnut"]],
+      steps: ["Simmer oats in the milk for 5 min, stirring.","Top with banana, maple syrup and walnuts. Oats and banana are two of the most reflux-safe foods there are."],
+    },
+    {
+      name: "Herb-Poached White Fish with Mashed Potato",
+      ing: [["2 cod or tilapia fillets","fish"],["2 cups low-sodium veg broth (onion/garlic-free)","broth"],["fresh parsley & dill","dill",true],["2 potatoes","potato"],["splash of low-fat milk","milk",true]],
+      steps: ["Boil potatoes, mash with a splash of milk and a pinch of salt (skip the butter).","Poach fish in gently simmering broth with herbs, 8–10 min.","Poaching keeps it fat-free — no frying, no heartburn."],
+    },
+    {
+      name: "Turkey & Zucchini Skillet",
+      ing: [["300 g lean ground turkey","turkey"],["1 zucchini, diced","zucchini"],["1 carrot, grated","carrot"],["1 tbsp olive oil","olive oil",true],["½ tsp dried oregano","oregano",true],["couscous or rice to serve","rice"]],
+      steps: ["Brown turkey in oil over medium heat, breaking it up.","Add zucchini, carrot, oregano and salt; cook 6–8 min until soft.","Serve over couscous or rice. Lean protein + green veg, zero trigger spices."],
+    },
+    {
+      name: "Egg-White Veggie Scramble on Toast",
+      ing: [["4 egg whites","egg"],["handful of spinach","spinach"],["½ zucchini, diced","zucchini"],["1 tsp olive oil","olive oil",true],["2 slices whole-grain bread","bread"]],
+      steps: ["Soften zucchini in the oil 3–4 min; add spinach until wilted.","Pour in egg whites, scramble gently until just set.","Serve on toast. Egg whites skip the fattier yolk that bothers some reflux sufferers."],
+    },
+    {
+      name: "Sweet Potato & Carrot Soup",
+      ing: [["2 sweet potatoes","sweet potato"],["3 carrots","carrot"],["1 tsp grated ginger","ginger"],["3 cups veg broth (onion/garlic-free)","broth"],["½ cup oat milk","milk",true]],
+      steps: ["Simmer chopped sweet potato, carrot and ginger in broth 20 min until soft.","Blend smooth, stir in oat milk, season with salt.","Creamy without cream — comforting and completely trigger-free."],
+    },
+    {
+      name: "Melon-Ginger Smoothie",
+      ing: [["1 cup cantaloupe or honeydew","melon"],["½ banana","banana"],["½ cup almond milk","milk"],["¼ tsp grated ginger","ginger",true]],
+      steps: ["Blend everything with ice until smooth. Melons are low-acid and cooling — a safe swap for citrus smoothies."],
+    },
+  ],
+  ibs: [
+    {
+      name: "Garlic-Infused Oil Chicken Stir-Fry",
+      ing: [["2 tbsp garlic-infused olive oil","oil",true],["2 chicken breasts, sliced","chicken"],["1 red bell pepper","pepper"],["1 zucchini","zucchini"],["1 carrot","carrot"],["2 tbsp tamari (GF soy sauce)","tamari",true],["1 tsp grated ginger","ginger",true],["rice to serve","rice"]],
+      steps: ["Heat the infused oil in a wok; stir-fry chicken until golden.","Add sliced vegetables and ginger; stir-fry 4–5 min.","Splash in tamari and serve over rice. FODMAPs don't dissolve into oil — that's why infused oil is the classic low-FODMAP hack."],
+    },
+    {
+      name: "Overnight Oats with Strawberries & Peanut Butter",
+      ing: [["½ cup rolled oats","oat"],["¾ cup lactose-free milk","milk"],["1 tbsp peanut butter","peanut"],["1 tsp maple syrup","maple",true],["5 strawberries","strawberr"],["1 tbsp pumpkin seeds","pumpkin seed",true]],
+      steps: ["Mix oats, milk, peanut butter and maple syrup in a jar; refrigerate overnight.","Top with strawberries and seeds in the morning. All low-FODMAP at these portions."],
+    },
+    {
+      name: "Lemon-Herb Baked Salmon with Roast Potatoes",
+      ing: [["2 salmon fillets","salmon"],["1 lemon","lemon"],["fresh dill","dill",true],["2 tbsp olive oil","olive oil",true],["500 g potatoes","potato"],["green beans","green bean"]],
+      steps: ["Toss cubed potatoes in oil and salt; roast at 220°C / 425°F for 25 min.","Add salmon topped with lemon slices and dill for the last 12–14 min.","Steam green beans to serve alongside. Simple, filling, and completely FODMAP-safe."],
+    },
+    {
+      name: "Quinoa Bowl with Feta & Roasted Veg",
+      ing: [["1 cup quinoa","quinoa"],["1 zucchini","zucchini"],["1 red bell pepper","pepper"],["1 carrot","carrot"],["2 tbsp garlic-infused oil","oil",true],["40 g feta","feta"],["handful of spinach","spinach"],["squeeze of lemon","lemon",true]],
+      steps: ["Roast chopped vegetables in the infused oil at 200°C / 400°F for 20 min.","Cook quinoa; fold in spinach while hot so it wilts.","Top with roasted veg, crumbled feta and lemon juice. Feta and hard cheeses are naturally low-lactose."],
+    },
+    {
+      name: "Rice Noodle Chicken Soup",
+      ing: [["100 g rice noodles","noodle"],["1 chicken breast, shredded","chicken"],["1 carrot, julienned","carrot"],["1 tsp grated ginger","ginger",true],["3 cups chicken broth (onion/garlic-free)","broth"],["green tops of 2 scallions","scallion",true]],
+      steps: ["Simmer chicken and carrot in broth with ginger ~12 min; shred the chicken.","Add rice noodles for the last 4–5 min.","Finish with sliced scallion greens — the green tops are low-FODMAP even though the white bulb isn't."],
+    },
+    {
+      name: "Cheddar & Spinach Omelet",
+      ing: [["3 eggs","egg"],["30 g cheddar, grated","cheddar"],["handful of spinach","spinach"],["1 tsp olive oil or butter","oil",true]],
+      steps: ["Whisk eggs; wilt spinach in the pan first.","Pour eggs over, cook until nearly set, add cheddar, fold.","Aged cheeses like cheddar have almost no lactose."],
+    },
+    {
+      name: "Banana-Blueberry Smoothie",
+      ing: [["1 firm banana (ripe = higher FODMAP)","banana"],["½ cup blueberries","blueberr"],["1 cup lactose-free or almond milk","milk"],["1 tsp maple syrup","maple",true]],
+      steps: ["Blend everything with ice until smooth. A safe swap for apple- or mango-based smoothies."],
+    },
+  ],
+};
+
 const EXAMPLES = {
   reflux: "Wheat flour, tomato paste, sunflower oil, garlic powder, onion powder, sugar, salt, citric acid, chili extract, cocoa powder, natural flavors",
   ibs: "Whole wheat flour, honey, milk solids, onion powder, inulin (chicory root fiber), sorbitol, cashews, sunflower oil, salt, natural flavors",
@@ -564,6 +577,76 @@ function clearInput(mode) {
   document.getElementById("input-" + mode).value = "";
   document.getElementById("results-card-" + mode).classList.add("hidden");
 }
+
+// ============ Recipe rendering & pantry matching ============
+function recipeHTML(r, match) {
+  const ingLine = r.ing.map(([disp, key], i) => {
+    if (match && match.matchedIdx.has(i)) return `<strong class="have">${disp}</strong>`;
+    return disp;
+  }).join(", ");
+  const steps = r.steps.map(s => `<li>${s}</li>`).join("");
+  let matchLine = "";
+  if (match) {
+    const missing = match.missing.length
+      ? `<span class="miss">You'd still need: ${match.missing.join(", ")}.</span>`
+      : `<span class="have">✓ You have everything you need!</span>`;
+    matchLine = `<p class="match-line">Uses <strong>${match.matched}</strong> of your ingredients (bold below). ${missing}</p>`;
+  }
+  return `<details class="recipe"${match ? " open" : ""}>
+    <summary>${r.name}${match && !match.missing.length ? " 🏆" : ""}</summary>
+    ${matchLine}
+    <p><strong>Ingredients:</strong> ${ingLine}.</p>
+    <ul>${steps}</ul>
+  </details>`;
+}
+
+function renderAllRecipes(mode) {
+  document.getElementById("recipelist-" + mode).innerHTML =
+    RECIPES[mode].map(r => recipeHTML(r)).join("");
+}
+
+function matchRecipe(r, tokens) {
+  const matchedIdx = new Set();
+  const missing = [];
+  r.ing.forEach(([disp, key, staple], i) => {
+    const hit = tokens.some(t =>
+      (t.length >= 3 && key.length >= 3) && (t.includes(key) || key.includes(t)));
+    if (hit) matchedIdx.add(i);
+    else if (!staple) missing.push(disp.replace(/^[\d½¾¼]+\s*(g|kg|ml|cup[s]?|tbsp|tsp|slices?)?\s*(of)?\s*/i, ""));
+  });
+  return { matched: matchedIdx.size, matchedIdx, missing };
+}
+
+function suggestRecipes(mode) {
+  const tokens = splitIngredients(document.getElementById("pantry-" + mode).value);
+  const out = document.getElementById("suggest-" + mode);
+  if (!tokens.length) {
+    out.innerHTML = '<p class="hint" style="margin-top:12px">Type a few ingredients first — e.g. "chicken, rice, carrots".</p>';
+    return;
+  }
+  const scored = RECIPES[mode]
+    .map(r => ({ r, m: matchRecipe(r, tokens) }))
+    .filter(x => x.m.matched > 0)
+    .sort((a, b) => (b.m.matched - a.m.matched) || (a.m.missing.length - b.m.missing.length));
+
+  if (!scored.length) {
+    out.innerHTML = '<p class="hint" style="margin-top:12px">No recipe matches those ingredients yet — browse the full list below for ideas.</p>';
+    return;
+  }
+  const makeable = scored.filter(x => !x.m.missing.length).length;
+  const header = makeable
+    ? `<p class="match-line" style="margin-top:14px">🏆 You can make <strong>${makeable}</strong> recipe${makeable > 1 ? "s" : ""} right now — plus ${scored.length - makeable} more with a couple of extra ingredients.</p>`
+    : `<p class="match-line" style="margin-top:14px">Closest matches with what you have:</p>`;
+  out.innerHTML = header + scored.map(x => recipeHTML(x.r, x.m)).join("");
+}
+
+function clearPantry(mode) {
+  document.getElementById("pantry-" + mode).value = "";
+  document.getElementById("suggest-" + mode).innerHTML = "";
+}
+
+renderAllRecipes("reflux");
+renderAllRecipes("ibs");
 
 function switchTab(mode) {
   const other = mode === "reflux" ? "ibs" : "reflux";
