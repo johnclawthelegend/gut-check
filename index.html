@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GutCheck — Ingredient Checker for Acid Reflux &amp; IBS</title>
+<meta name="description" content="Paste a food label's ingredient list and instantly see which ingredients commonly trigger acid reflux (GERD) or IBS symptoms.">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #0f766e;
+    --accent-soft: #ccfbf1;
+    --avoid: #b91c1c;
+    --avoid-bg: #fee2e2;
+    --caution: #b45309;
+    --caution-bg: #fef3c7;
+    --ok: #15803d;
+    --ok-bg: #dcfce7;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 14px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111418;
+      --card: #1a1f26;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #2b323c;
+      --accent: #2dd4bf;
+      --accent-soft: #103c38;
+      --avoid: #f87171;
+      --avoid-bg: #3b1414;
+      --caution: #fbbf24;
+      --caution-bg: #3a2c0a;
+      --ok: #4ade80;
+      --ok-bg: #10301c;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.55;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { text-align: center; padding: 28px 0 8px; }
+  header h1 { font-size: 2rem; letter-spacing: -.02em; }
+  header h1 .logo { color: var(--accent); }
+  header p.tag { color: var(--muted); margin-top: 6px; font-size: 1.02rem; }
+
+  .tabs { display: flex; gap: 8px; justify-content: center; margin: 26px 0 20px; flex-wrap: wrap; }
+  .tab {
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    padding: 10px 22px; border-radius: 999px; font-size: 1rem; cursor: pointer;
+    transition: all .15s ease;
+  }
+  .tab:hover { border-color: var(--accent); }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .tab.active { color: #06211e; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow);
+  }
+  .card h2 { font-size: 1.2rem; margin-bottom: 8px; }
+  .card h3 { font-size: 1.02rem; margin: 14px 0 6px; }
+  .hint { color: var(--muted); font-size: .92rem; margin-bottom: 10px; }
+
+  textarea {
+    width: 100%; min-height: 110px; resize: vertical;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; font-size: 1rem; font-family: inherit;
+  }
+  textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  button.primary {
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 11px 24px; font-size: 1rem; font-weight: 600; cursor: pointer;
+  }
+  @media (prefers-color-scheme: dark) { button.primary { color: #06211e; } }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 18px; font-size: .95rem; cursor: pointer;
+  }
+  button.ghost:hover { color: var(--text); border-color: var(--muted); }
+
+  .summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .pill {
+    border-radius: 999px; padding: 6px 14px; font-size: .92rem; font-weight: 600;
+  }
+  .pill.avoid { background: var(--avoid-bg); color: var(--avoid); }
+  .pill.caution { background: var(--caution-bg); color: var(--caution); }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+
+  ul.results { list-style: none; }
+  ul.results li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 4px; border-bottom: 1px solid var(--border);
+  }
+  ul.results li:last-child { border-bottom: none; }
+  .badge {
+    flex-shrink: 0; width: 92px; text-align: center; border-radius: 8px;
+    font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: 4px 0; margin-top: 2px;
+  }
+  .badge.avoid { background: var(--avoid-bg); color: var(--avoid); }
+  .badge.caution { background: var(--caution-bg); color: var(--caution); }
+  .badge.ok { background: var(--ok-bg); color: var(--ok); }
+  .res-name { font-weight: 600; }
+  .res-why { color: var(--muted); font-size: .9rem; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+  .foodlist { list-style: none; }
+  .foodlist li { padding: 3px 0; font-size: .95rem; }
+  .foodlist li::before { content: "• "; color: var(--accent); font-weight: 700; }
+
+  details { margin-top: 8px; }
+  details.recipe {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 4px 14px; margin-top: 10px; background: var(--bg);
+  }
+  details.recipe summary { color: var(--accent); }
+  details.recipe p, details.recipe ul { margin-bottom: 8px; }
+  summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+  details p, details li { font-size: .95rem; }
+  details ul { padding-left: 20px; margin: 6px 0; }
+
+  .disclaimer {
+    margin-top: 24px; padding: 14px 16px; border-radius: 12px;
+    background: var(--accent-soft); color: var(--text); font-size: .88rem;
+  }
+  .hidden { display: none; }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 34px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="logo">✓</span> GutCheck</h1>
+    <p class="tag">Paste the ingredient list from any food label — see what may trigger your symptoms.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" id="tab-reflux" role="tab" aria-selected="true" onclick="switchTab('reflux')">🔥 Acid Reflux (GERD)</button>
+    <button class="tab" id="tab-ibs" role="tab" aria-selected="false" onclick="switchTab('ibs')">🌀 IBS</button>
+  </nav>
+
+  <!-- ==================== ACID REFLUX SECTION ==================== -->
+  <section id="section-reflux">
+    <div class="card">
+      <h2>Check ingredients for reflux triggers</h2>
+      <p class="hint">Copy the ingredient list off the package (commas, parentheses and all) and paste it below.</p>
+      <textarea id="input-reflux" placeholder="e.g. Wheat flour, tomato paste, sunflower oil, garlic powder, citric acid, chili extract, natural flavors…"></textarea>
+      <div class="btn-row">
+        <button class="primary" onclick="analyze('reflux')">Check ingredients</button>
+        <button class="ghost" onclick="loadExample('reflux')">Try an example</button>
+        <button class="ghost" onclick="clearInput('reflux')">Clear</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="results-card-reflux">
+      <h2>Results</h2>
+      <div class="summary" id="summary-reflux"></div>
+      <ul class="results" id="results-reflux"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Quick guide: eating with acid reflux</h2>
+      <div class="cols">
+        <div>
+          <h3>🚫 Common triggers</h3>
+          <ul class="foodlist">
+            <li>Tomato &amp; tomato sauces</li>
+            <li>Citrus (orange, lemon, grapefruit)</li>
+            <li>Chocolate &amp; cocoa</li>
+            <li>Peppermint &amp; spearmint</li>
+            <li>Coffee, caffeine, energy drinks</li>
+            <li>Alcohol</li>
+            <li>Fried &amp; high-fat foods</li>
+            <li>Spicy peppers &amp; hot sauce</li>
+            <li>Garlic &amp; raw onion</li>
+            <li>Carbonated drinks</li>
+            <li>Vinegar-heavy dressings</li>
+          </ul>
+        </div>
+        <div>
+          <h3>✅ Usually gentle</h3>
+          <ul class="foodlist">
+            <li>Oatmeal &amp; whole grains</li>
+            <li>Bananas &amp; melons</li>
+            <li>Lean chicken, turkey, fish</li>
+            <li>Egg whites</li>
+            <li>Green vegetables (broccoli, green beans, asparagus)</li>
+            <li>Potatoes &amp; sweet potatoes</li>
+            <li>Rice &amp; couscous</li>
+            <li>Ginger (small amounts)</li>
+            <li>Low-fat yogurt</li>
+            <li>Almond or oat milk</li>
+          </ul>
+        </div>
+      </div>
+      <details>
+        <summary>Why these foods matter</summary>
+        <p>Reflux happens when stomach contents flow back up through the lower esophageal sphincter (LES). Trigger foods generally do one of three things:</p>
+        <ul>
+          <li><strong>Relax the LES</strong> — chocolate, mint, caffeine, alcohol, and high-fat foods make the valve looser.</li>
+          <li><strong>Add acid</strong> — tomatoes, citrus, and vinegar increase the acidity of what could come back up.</li>
+          <li><strong>Irritate directly</strong> — spicy compounds like capsaicin can irritate an already inflamed esophagus.</li>
+        </ul>
+        <p>Beyond ingredients: smaller meals, not lying down for 2–3 hours after eating, and limiting late-night snacks all help.</p>
+      </details>
+    </div>
+    <div class="card">
+      <h2>🍽️ Reflux-friendly recipes</h2>
+      <p class="hint">Low-acid, low-fat, no trigger spices — designed to be gentle on the esophagus.</p>
+
+      <details class="recipe">
+        <summary>Ginger-Honey Baked Chicken with Rice</summary>
+        <p><strong>Ingredients:</strong> 2 chicken breasts, 1 tbsp olive oil, 1 tsp grated fresh ginger, 1 tsp honey, ½ tsp dried thyme, pinch of salt, 1 cup rice, steamed green beans.</p>
+        <ul>
+          <li>Preheat oven to 200°C / 400°F. Rub chicken with oil, ginger, honey, thyme and salt.</li>
+          <li>Bake 22–25 min until cooked through (74°C / 165°F inside).</li>
+          <li>Serve over plain rice with steamed green beans. Ginger is one of the few "spices" that actually soothes many reflux stomachs.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Creamy Banana-Oat Breakfast Bowl</summary>
+        <p><strong>Ingredients:</strong> ½ cup rolled oats, 1 cup oat or almond milk, 1 ripe banana (sliced), 1 tsp maple syrup, pinch of cinnamon (optional — skip if sensitive), 1 tbsp chopped walnuts.</p>
+        <ul>
+          <li>Simmer oats in the milk for 5 min, stirring.</li>
+          <li>Top with banana, maple syrup and walnuts. Oats and banana are two of the most reflux-safe foods there are.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Herb-Poached White Fish with Mashed Potato</summary>
+        <p><strong>Ingredients:</strong> 2 cod or tilapia fillets, 2 cups low-sodium vegetable broth (onion/garlic-free if possible), parsley, dill, 2 potatoes, splash of low-fat milk, salt.</p>
+        <ul>
+          <li>Boil potatoes, mash with a splash of milk and a pinch of salt (skip the butter).</li>
+          <li>Poach fish in gently simmering broth with herbs, 8–10 min.</li>
+          <li>Poaching keeps it fat-free — no frying, no heartburn.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Turkey &amp; Zucchini Skillet</summary>
+        <p><strong>Ingredients:</strong> 300 g lean ground turkey, 1 zucchini (diced), 1 carrot (grated), 1 tbsp olive oil, ½ tsp dried oregano, salt, cooked couscous or rice to serve.</p>
+        <ul>
+          <li>Brown turkey in oil over medium heat, breaking it up.</li>
+          <li>Add zucchini, carrot, oregano and salt; cook 6–8 min until soft.</li>
+          <li>Serve over couscous. Lean protein + green veg, zero trigger spices.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Melon-Ginger Smoothie</summary>
+        <p><strong>Ingredients:</strong> 1 cup cantaloupe or honeydew chunks, ½ banana, ½ cup almond milk, ¼ tsp grated ginger, ice.</p>
+        <ul>
+          <li>Blend everything until smooth. Melons are low-acid and cooling — a safe swap for citrus smoothies.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <!-- ==================== IBS SECTION ==================== -->
+  <section id="section-ibs" class="hidden">
+    <div class="card">
+      <h2>Check ingredients for IBS triggers (FODMAP-based)</h2>
+      <p class="hint">Paste the label's ingredient list below. Flags are based on high-FODMAP ingredients and common gut irritants.</p>
+      <textarea id="input-ibs" placeholder="e.g. Whole wheat flour, onion powder, honey, inulin, milk solids, sorbitol, natural flavors…"></textarea>
+      <div class="btn-row">
+        <button class="primary" onclick="analyze('ibs')">Check ingredients</button>
+        <button class="ghost" onclick="loadExample('ibs')">Try an example</button>
+        <button class="ghost" onclick="clearInput('ibs')">Clear</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="results-card-ibs">
+      <h2>Results</h2>
+      <div class="summary" id="summary-ibs"></div>
+      <ul class="results" id="results-ibs"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Quick guide: eating with IBS</h2>
+      <div class="cols">
+        <div>
+          <h3>🚫 Common triggers (high-FODMAP)</h3>
+          <ul class="foodlist">
+            <li>Onion &amp; garlic (incl. powders)</li>
+            <li>Wheat, rye &amp; barley in large amounts</li>
+            <li>Milk, cream &amp; soft cheeses (lactose)</li>
+            <li>Honey, agave &amp; high-fructose corn syrup</li>
+            <li>Apples, pears, mango, watermelon</li>
+            <li>Beans, lentils &amp; chickpeas</li>
+            <li>Sugar alcohols (sorbitol, mannitol, xylitol)</li>
+            <li>Inulin / chicory root fiber</li>
+            <li>Cashews &amp; pistachios</li>
+            <li>Mushrooms &amp; cauliflower</li>
+          </ul>
+        </div>
+        <div>
+          <h3>✅ Usually gentle (low-FODMAP)</h3>
+          <ul class="foodlist">
+            <li>Rice, oats, quinoa</li>
+            <li>Sourdough spelt or gluten-free bread</li>
+            <li>Bananas (firm), blueberries, strawberries, oranges</li>
+            <li>Carrots, zucchini, spinach, potatoes</li>
+            <li>Eggs, chicken, fish, tofu (firm)</li>
+            <li>Lactose-free milk &amp; hard cheeses</li>
+            <li>Peanuts, walnuts, pumpkin seeds</li>
+            <li>Maple syrup &amp; table sugar (small amounts)</li>
+            <li>Garlic-infused oil (flavor without FODMAPs)</li>
+          </ul>
+        </div>
+      </div>
+      <details>
+        <summary>Why these foods matter</summary>
+        <p>IBS symptoms are often driven by <strong>FODMAPs</strong> — Fermentable Oligo-, Di-, Mono-saccharides And Polyols. These are short-chain carbohydrates that are poorly absorbed in the small intestine:</p>
+        <ul>
+          <li><strong>Oligosaccharides (fructans &amp; GOS)</strong> — onion, garlic, wheat, legumes.</li>
+          <li><strong>Disaccharides (lactose)</strong> — milk, soft cheese, ice cream.</li>
+          <li><strong>Monosaccharides (excess fructose)</strong> — honey, apples, HFCS.</li>
+          <li><strong>Polyols</strong> — sorbitol, mannitol and other "-ol" sweeteners, stone fruits.</li>
+        </ul>
+        <p>They pull water into the gut and get fermented by bacteria, causing gas, bloating, pain and altered bowel habits. Everyone's tolerance differs — the low-FODMAP diet is designed as a short elimination phase followed by structured reintroduction, ideally with a dietitian.</p>
+      </details>
+    </div>
+    <div class="card">
+      <h2>🍽️ Low-FODMAP recipes</h2>
+      <p class="hint">No onion, no garlic, low lactose — flavor comes from infused oil, herbs and spices instead.</p>
+
+      <details class="recipe">
+        <summary>Garlic-Infused Oil Chicken Stir-Fry</summary>
+        <p><strong>Ingredients:</strong> 2 tbsp garlic-infused olive oil (flavor without the fructans), 2 chicken breasts (sliced), 1 red bell pepper, 1 zucchini, 1 carrot, 2 tbsp tamari (gluten-free soy sauce), 1 tsp grated ginger, rice to serve.</p>
+        <ul>
+          <li>Heat the infused oil in a wok; stir-fry chicken until golden.</li>
+          <li>Add sliced vegetables and ginger; stir-fry 4–5 min.</li>
+          <li>Splash in tamari and serve over rice. FODMAPs don't dissolve into oil — that's why infused oil is the classic low-FODMAP hack.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Overnight Oats with Strawberries &amp; Peanut Butter</summary>
+        <p><strong>Ingredients:</strong> ½ cup rolled oats, ¾ cup lactose-free milk, 1 tbsp peanut butter, 1 tsp maple syrup, 5 strawberries (sliced), 1 tbsp pumpkin seeds.</p>
+        <ul>
+          <li>Mix oats, milk, peanut butter and maple syrup in a jar; refrigerate overnight.</li>
+          <li>Top with strawberries and seeds in the morning. All low-FODMAP at these portions.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Lemon-Herb Baked Salmon with Roast Potatoes</summary>
+        <p><strong>Ingredients:</strong> 2 salmon fillets, 1 lemon, fresh dill, 2 tbsp olive oil, 500 g potatoes, salt, pepper, green beans.</p>
+        <ul>
+          <li>Toss cubed potatoes in oil and salt; roast at 220°C / 425°F for 25 min.</li>
+          <li>Add salmon topped with lemon slices and dill for the last 12–14 min.</li>
+          <li>Steam green beans to serve alongside. Simple, filling, and completely FODMAP-safe.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Quinoa Bowl with Feta &amp; Roasted Veg</summary>
+        <p><strong>Ingredients:</strong> 1 cup quinoa, 1 zucchini, 1 red bell pepper, 1 carrot, 2 tbsp garlic-infused oil, 40 g feta (hard cheeses and feta are low-lactose), handful of spinach, squeeze of lemon.</p>
+        <ul>
+          <li>Roast chopped vegetables in the infused oil at 200°C / 400°F for 20 min.</li>
+          <li>Cook quinoa; fold in spinach while hot so it wilts.</li>
+          <li>Top with roasted veg, crumbled feta and lemon juice.</li>
+        </ul>
+      </details>
+
+      <details class="recipe">
+        <summary>Banana-Blueberry Smoothie</summary>
+        <p><strong>Ingredients:</strong> 1 firm banana (ripe ones are higher-FODMAP), ½ cup blueberries, 1 cup lactose-free milk or almond milk, 1 tsp maple syrup, ice.</p>
+        <ul>
+          <li>Blend until smooth. A safe swap for apple- or mango-based smoothies.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <div class="disclaimer">
+    <strong>⚕️ Not medical advice.</strong> This tool highlights ingredients that <em>commonly</em> trigger symptoms — individual tolerance varies widely, and amounts matter. It cannot detect every trigger (e.g. "natural flavors" can hide many things). Always confirm with your doctor or a registered dietitian, especially before starting an elimination diet.
+  </div>
+
+  <footer>GutCheck — a free, open-source tool. No data leaves your browser.</footer>
+</div>
+
+<script>
+// ============ Trigger databases ============
+// Each rule: [regex, level, reason]. First match wins; "avoid" rules are checked before "caution".
+const DB = {
+  reflux: {
+    avoid: [
+      [/tomato/, "Tomatoes are highly acidic and a top reflux trigger."],
+      [/\b(lemon|lime|orange|grapefruit|tangerine|mandarin)\b/, "Citrus is acidic and commonly worsens reflux."],
+      [/citrus/, "Citrus is acidic and commonly worsens reflux."],
+      [/\b(chocolate|cocoa|cacao)\b/, "Chocolate relaxes the lower esophageal sphincter (LES)."],
+      [/\b(peppermint|spearmint)\b|mint (oil|extract|flavor)/, "Mint relaxes the LES, letting acid escape upward."],
+      [/\b(coffee|espresso|caffeine|guarana|kola nut|yerba mate|mate extract)\b/, "Caffeine relaxes the LES and stimulates acid production."],
+      [/\b(alcohol|wine|beer|rum|vodka|whiskey|whisky|brandy|liqueur|bourbon)\b/, "Alcohol relaxes the LES and irritates the esophagus."],
+      [/\bgarlic\b/, "Garlic is a frequent heartburn trigger for many people."],
+      [/\bonion/, "Onion (especially raw) commonly triggers reflux."],
+      [/\b(chili|chilli|cayenne|jalapeno|jalapeño|habanero|sriracha|tabasco|hot sauce|hot pepper|red pepper flakes|capsaicin)\b/, "Spicy capsaicin irritates the esophagus and slows stomach emptying."],
+      [/vinegar/, "Vinegar is acidic and can aggravate reflux."],
+      [/\b(carbonated|soda water|sparkling water|club soda)\b/, "Carbonation increases stomach pressure and belching."],
+      [/\b(lard|tallow|shortening|hydrogenated)\b/, "Very high-fat ingredients delay stomach emptying and relax the LES."],
+      [/\bfried\b/, "Fried foods are high-fat and strongly linked to reflux symptoms."],
+      [/\bpineapple\b/, "Pineapple is acidic and can trigger heartburn."],
+      [/\b(black tea|green tea)\b/, "Tea contains caffeine, which can relax the LES."],
+    ],
+    caution: [
+      [/citric acid/, "Usually a small amount as preservative, but adds acidity — may bother sensitive stomachs."],
+      [/\b(butter|cream|creamer|heavy cream|whole milk)\b/, "Higher-fat dairy can slow digestion and worsen reflux in larger amounts."],
+      [/\bcheese\b/, "Full-fat cheese can trigger symptoms in bigger portions."],
+      [/\b(palm oil|coconut oil|palm kernel)\b/, "Rich saturated-fat oils — fine in small amounts, heavy servings may trigger."],
+      [/\bblack pepper\b|\bpepper\b/, "Pepper is mildly irritating for some reflux sufferers."],
+      [/\bpaprika\b/, "Mildly spicy; bothers some people with reflux."],
+      [/\bmustard\b/, "Mustard contains vinegar and spice — mixed tolerance."],
+      [/\bcurry\b/, "Spice blends often contain chili; check heat level."],
+      [/natural flavou?rs?/, "A catch-all term that can hide mint, citrus or spice extracts."],
+      [/\bmint\b/, "May refer to mint flavoring, which relaxes the LES."],
+      [/\bsalsa\b|\bketchup\b|marinara/, "Tomato-based — acidic."],
+      [/\bwhole egg|egg yolk/, "Yolks are higher in fat; egg whites are gentler."],
+      [/\bpeanut butter\b/, "High-fat; small amounts are usually fine."],
+    ],
+  },
+  ibs: {
+    avoid: [
+      [/\bonion/, "Onion is very high in fructans — one of the most common IBS triggers."],
+      [/\bgarlic\b/, "Garlic is very high in fructans, even as powder."],
+      [/\b(shallot|leek)\b/, "Allium family — high in fructans."],
+      [/high[- ]fructose corn syrup|\bhfcs\b|glucose[- ]fructose syrup/, "Excess fructose is poorly absorbed and ferments in the gut."],
+      [/\bhoney\b/, "High in excess fructose — a common IBS trigger."],
+      [/\bagave\b/, "Very high in fructose."],
+      [/\b(sorbitol|mannitol|xylitol|maltitol|isomalt|lactitol)\b/, "Sugar alcohols (polyols) are poorly absorbed and often cause gas, bloating and laxative effects."],
+      [/\b(inulin|chicory root|fructo-?oligosaccharides|fos\b|oligofructose)/, "Added fibers that are highly fermentable — frequent bloating culprits."],
+      [/\b(milk solids|condensed milk|evaporated milk|milk powder|whole milk|skim milk|buttermilk)\b/, "Contains lactose — a common trigger if you're lactose-sensitive."],
+      [/\bmilk\b/, "Contains lactose — a common trigger if you're lactose-sensitive."],
+      [/\bwheat (flour|bran|germ|starch|protein)|whole wheat|\bsemolina\b|\bdurum\b|\bspelt flour\b|\bcouscous\b/, "Wheat is high in fructans when eaten in bread/pasta quantities."],
+      [/\b(rye|barley)\b/, "High in fructans."],
+      [/\b(apple|pear) (juice|puree|purée|concentrate)|\bapple\b|\bpear\b/, "Apples and pears are high in excess fructose and sorbitol."],
+      [/\b(mango|watermelon)\b/, "High in excess fructose / polyols."],
+      [/\b(dates|raisins|sultanas|dried fig|figs|prunes|dried fruit)\b/, "Dried fruits concentrate fructose and sorbitol."],
+      [/\b(cashew|pistachio)/, "High in GOS (galacto-oligosaccharides)."],
+      [/\bmushroom/, "High in mannitol (a polyol)."],
+      [/\b(kidney beans|black beans|baked beans|soy flour|soybeans?)\b/, "Legumes are high in GOS — classic gas and bloating trigger."],
+      [/\bcauliflower\b/, "High in mannitol."],
+      [/\bmolasses\b/, "High in fructans and fructose."],
+    ],
+    caution: [
+      [/\b(chickpea|garbanzo|lentil)s?\b/, "Moderate FODMAPs — small, well-rinsed canned portions are often tolerated."],
+      [/\b(cream|yogurt|yoghurt|soft cheese|ricotta|cottage cheese|ice cream)\b/, "Contains some lactose; tolerance varies."],
+      [/\bwhey\b/, "Whey concentrate contains lactose; isolate is usually fine."],
+      [/\bbutter\b/, "Very low lactose, but high fat can stimulate gut contractions."],
+      [/\bwheat\b/, "Small amounts (e.g. soy sauce, thickeners) are usually low-FODMAP; large amounts are not."],
+      [/\bfructose\b/, "Depends on the glucose balance and amount."],
+      [/\b(erythritol|stevia.*erythritol blend)\b/, "Better tolerated than other polyols, but can still cause symptoms in large doses."],
+      [/\bsucralose\b|\bacesulfame\b|\baspartame\b/, "Artificial sweeteners irritate some IBS sufferers."],
+      [/\bcarrageenan\b/, "A thickener some people report as a gut irritant."],
+      [/natural flavou?rs?/, "A catch-all term that can hide onion, garlic or fruit concentrates."],
+      [/\b(avocado|celery|sweet corn|corn syrup)\b/, "Moderate FODMAPs — portion-dependent."],
+      [/\bcoconut (milk|cream)\b/, "Moderate polyols; small servings usually fine."],
+      [/\bhummus\b/, "Contains chickpeas and usually garlic."],
+      [/\b(cherry|cherries|blackberr|nectarine|peach|plum|apricot)/, "Stone fruits and blackberries contain sorbitol."],
+      [/\bhoneydew\b/, "Contains some excess fructose."],
+      [/\bbroccoli\b/, "Stalks are higher in FODMAPs; florets in normal portions are fine."],
+    ],
+  },
+};
+
+const EXAMPLES = {
+  reflux: "Wheat flour, tomato paste, sunflower oil, garlic powder, onion powder, sugar, salt, citric acid, chili extract, cocoa powder, natural flavors",
+  ibs: "Whole wheat flour, honey, milk solids, onion powder, inulin (chicory root fiber), sorbitol, cashews, sunflower oil, salt, natural flavors",
+};
+
+// ============ Parsing & matching ============
+function splitIngredients(raw) {
+  // Flatten parentheses into separators so sub-ingredients get checked too,
+  // then split on commas, semicolons, newlines, bullets and "and".
+  const flattened = raw.replace(/[()\[\]]/g, ",");
+  return flattened
+    .split(/[,;\n•·|]+/)
+    .map(s => s.replace(/\b(contains?|ingredients?|may contain|and\/or|and)\b:?/gi, " ").replace(/[.:*%\d]+/g, " ").trim().toLowerCase())
+    .filter(s => s.length > 1);
+}
+
+function classify(ingredient, mode) {
+  for (const [re, why] of DB[mode].avoid) {
+    if (re.test(ingredient)) return { level: "avoid", why };
+  }
+  for (const [re, why] of DB[mode].caution) {
+    if (re.test(ingredient)) return { level: "caution", why };
+  }
+  return { level: "ok", why: mode === "reflux"
+    ? "Not a recognized common reflux trigger."
+    : "Not a recognized high-FODMAP ingredient or common IBS irritant." };
+}
+
+function analyze(mode) {
+  const raw = document.getElementById("input-" + mode).value;
+  const items = splitIngredients(raw);
+  const card = document.getElementById("results-card-" + mode);
+  const list = document.getElementById("results-" + mode);
+  const summary = document.getElementById("summary-" + mode);
+  list.innerHTML = "";
+  summary.innerHTML = "";
+
+  if (!items.length) {
+    card.classList.remove("hidden");
+    summary.innerHTML = '<span class="pill caution">Paste an ingredient list first.</span>';
+    return;
+  }
+
+  // Deduplicate while keeping order
+  const seen = new Set();
+  const results = [];
+  for (const ing of items) {
+    if (seen.has(ing)) continue;
+    seen.add(ing);
+    results.push({ name: ing, ...classify(ing, mode) });
+  }
+
+  const order = { avoid: 0, caution: 1, ok: 2 };
+  results.sort((a, b) => order[a.level] - order[b.level]);
+
+  const counts = { avoid: 0, caution: 0, ok: 0 };
+  for (const r of results) {
+    counts[r.level]++;
+    const li = document.createElement("li");
+    const badgeText = r.level === "avoid" ? "Avoid" : r.level === "caution" ? "Caution" : "Likely OK";
+    li.innerHTML = `<span class="badge ${r.level}">${badgeText}</span>
+      <div><div class="res-name"></div><div class="res-why"></div></div>`;
+    li.querySelector(".res-name").textContent = r.name;
+    li.querySelector(".res-why").textContent = r.why;
+    list.appendChild(li);
+  }
+
+  const pills = [];
+  if (counts.avoid) pills.push(`<span class="pill avoid">🚫 ${counts.avoid} to avoid</span>`);
+  if (counts.caution) pills.push(`<span class="pill caution">⚠️ ${counts.caution} caution</span>`);
+  if (counts.ok) pills.push(`<span class="pill ok">✅ ${counts.ok} likely fine</span>`);
+  if (!counts.avoid && !counts.caution) pills.unshift(`<span class="pill ok">Looks gentle overall!</span>`);
+  summary.innerHTML = pills.join(" ");
+
+  card.classList.remove("hidden");
+  card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function loadExample(mode) {
+  document.getElementById("input-" + mode).value = EXAMPLES[mode];
+  analyze(mode);
+}
+
+function clearInput(mode) {
+  document.getElementById("input-" + mode).value = "";
+  document.getElementById("results-card-" + mode).classList.add("hidden");
+}
+
+function switchTab(mode) {
+  const other = mode === "reflux" ? "ibs" : "reflux";
+  document.getElementById("section-" + mode).classList.remove("hidden");
+  document.getElementById("section-" + other).classList.add("hidden");
+  document.getElementById("tab-" + mode).classList.add("active");
+  document.getElementById("tab-" + mode).setAttribute("aria-selected", "true");
+  document.getElementById("tab-" + other).classList.remove("active");
+  document.getElementById("tab-" + other).setAttribute("aria-selected", "false");
+}
+</script>
+</body>
+</html>
